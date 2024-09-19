@@ -3,12 +3,13 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 url_base = 'http://www.oesz.cn/'
-categories = {'睡前故事': url_base + 'shuiqian/',
+'''categories = {'睡前故事': url_base + 'shuiqian/',
               '童话故事': url_base + 'tonghua/',
               '寓言故事': url_base + 'yuyan/',
               '成语故事': url_base + 'chengyu/',
               '哲理故事': url_base + 'zheli/',
-              '故事大全': url_base + 'gushidaquan/',}
+              '故事大全': url_base + 'gushidaquan/',}'''
+categories = {'童话故事': url_base + 'tonghua/'}
 
 ## 除了每个故事的链接，还需要保存每个故事的分类
 ## 所以格式为: {'story title': （'url/to/story', 'category') }
@@ -95,21 +96,22 @@ for category in categories:
         next_page = url + next_page
         page_number += 1
 
-    print(f"Page {page_number}")
+    print(f"Obtained {len(titles_dict)} story urls.")
 
+print("Text crawling start.")
 data = [(name, info[0], info[1]) for name, info in titles_dict.items()]
 df = pd.DataFrame(data, columns=['name', 'url', 'category'])
-df.loc['content'] = None
-for i in range(df.shape[0]):
+empty_count = 0
+for i, row in df.iterrows():
     if i % 20 == 0 and i != 0:
         print(f"{i} Stories processed")
-    url = df.url[i]
+    url = row["url"]
     response = requests.get(url)
     response.encoding = 'utf-8'
     soup = BeautifulSoup(response.text, 'html.parser')
     ## 从网页中提取故事内容
     content = soup.find('div', class_='content').text.rstrip().replace('\r', '').replace('\u3000', '')
     df.loc[i, 'content'] = content
-
+print("Text crawling complete. Saving to file")
 
 df.to_csv('stories_cn_oesz.csv', index=False)
