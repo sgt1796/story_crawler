@@ -103,7 +103,6 @@ df.loc['content'] = None
 for i in range(df.shape[0]):
     if i % 20 == 0 and i != 0:
         print(f"{i} Stories processed")
-        break
     url = df.url[i]
     response = requests.get(url)
     response.encoding = 'utf-8'
