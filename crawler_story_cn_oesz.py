@@ -3,13 +3,12 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 url_base = 'http://www.oesz.cn/'
-'''categories = {'睡前故事': url_base + 'shuiqian/',
+categories = {'睡前故事': url_base + 'shuiqian/',
               '童话故事': url_base + 'tonghua/',
               '寓言故事': url_base + 'yuyan/',
               '成语故事': url_base + 'chengyu/',
               '哲理故事': url_base + 'zheli/',
-              '故事大全': url_base + 'gushidaquan/',}'''
-categories = {'童话故事': url_base + 'tonghua/'}
+              '故事大全': url_base + 'gushidaquan/',}
 
 ## 除了每个故事的链接，还需要保存每个故事的分类
 ## 所以格式为: {'story title': （'url/to/story', 'category') }
@@ -96,7 +95,7 @@ for category in categories:
         next_page = url + next_page
         page_number += 1
 
-    print(f"Obtained {len(titles_dict)} story urls.")
+print(f"Obtained {len(titles_dict)} story urls.")
 
 print("Text crawling start.")
 data = [(name, info[0], info[1]) for name, info in titles_dict.items()]
