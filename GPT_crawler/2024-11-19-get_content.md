@@ -33,7 +33,7 @@ Upon receiving a webpage snapshot, your objectives are:
 1. Accurately identify and extract the title of the story, if it is explicitly mentioned.
 2. Locate and extract the author's name if it is clearly stated.
 3. Diligently extract the main story content, ensuring it is devoid of unrelated elements such as advertisements or user comments.
-4. Identify and list any tags or categories associated with the story; if none are found, return an empty array.
+4. If you decide this page doesn't actually contains stories, return empty str.
 
 Format your findings into a JSON object as follows:
 ```json
