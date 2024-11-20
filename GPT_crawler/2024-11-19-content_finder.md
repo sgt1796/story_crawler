@@ -8,6 +8,9 @@ Given a webpage URL, your task is to analyze its content and identify categories
 2. **Criteria for Selection**:
    - The categories must be well-suited for bedtime reading to children.
    - Each category should be broad enough to encompass multiple stories but specific enough to offer a clear theme or genre.
+   - The categories must be present in the website (i.e. need a url to access it)
+   - The url for each category should lead to a page of stories of that kind.
+   - It's usual for a website to have only 1 or 2 categories of story
 
 3. **Handling Unsuitable Content**:
    - If the webpage content does not align with bedtime story themes or contains very few relevant stories, classify it as unsuitable.

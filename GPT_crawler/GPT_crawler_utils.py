@@ -1,7 +1,8 @@
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 from dotenv import load_dotenv
 import json
 import requests
+import backoff
 
 load_dotenv()
 client = OpenAI()
@@ -32,7 +33,8 @@ def get_text_snapshot(web_url):
         return response.text
     except requests.exceptions.RequestException as e:
         return f"Error fetching text snapshot: {e}"
-    
+
+@backoff.on_exception(backoff.expo, RateLimitError, max_time=60)
 def find_available_content(url):
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -76,6 +78,7 @@ def find_available_content(url):
     )
     return completion
 
+@backoff.on_exception(backoff.expo, RateLimitError, max_time=60)
 def GPT_boolean(url, query):
     """
     Checks if the given URL's content matches the query description.
@@ -128,7 +131,8 @@ def GPT_boolean(url, query):
     except Exception as e:
         print(f"Error occurred: {e}")
         return False
-    
+
+@backoff.on_exception(backoff.expo, RateLimitError, max_time=60)
 def get_titles_and_urls(url):
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -182,6 +186,7 @@ def get_titles_and_urls(url):
     
     return completion
 
+@backoff.on_exception(backoff.expo, RateLimitError, max_time=60)
 def get_content(url):
     completion = client.chat.completions.create(
             model="gpt-4o",
