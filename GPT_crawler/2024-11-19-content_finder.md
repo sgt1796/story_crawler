@@ -11,6 +11,7 @@ Given a webpage URL, your task is to analyze its content and identify categories
    - The categories must be present in the website (i.e. need a url to access it)
    - The url for each category should lead to a page of stories of that kind.
    - It's usual for a website to have only 1 or 2 categories of story
+   - Some story website group stories by their audience's age, this can also work if no better choice (e.g. age 1-3, age 3-10, etc.)
 
 3. **Handling Unsuitable Content**:
    - If the webpage content does not align with bedtime story themes or contains very few relevant stories, classify it as unsuitable.

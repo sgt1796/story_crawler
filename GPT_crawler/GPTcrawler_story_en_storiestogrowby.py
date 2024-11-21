@@ -9,6 +9,7 @@ client = OpenAI()
 
 base_url = "https://storiestogrowby.org/"
 #base_url = "https://www.freechildrenstories.com/"
+#base_url = "https://www.freechildrenstories.com/"
 
 completion_category = GPT_crawler.find_available_content(base_url)
 categories = json.loads(completion_category.choices[0].message.content).get('categories', {})
@@ -19,7 +20,7 @@ for category, category_url in categories.copy().items():
         print(f"The category '{category}' contains stories for kids.")
     else:
         print(f"The category '{category}' does not contain stories for kids.")
-        del categories[category]
+        del categories[category] 
 
 
 for category, category_url in categories.items():
@@ -31,15 +32,18 @@ titles_and_urls = {}
 
 for category, category_url in categories.items():
     completion_titles = GPT_crawler.get_titles_and_urls(category_url)
-    titles_and_urls_json = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', {})
+    titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
     print(f"Category: {category}")
     
-    for title, url in titles_and_urls_json.items():
+    for title_and_url in titles_and_urls_list:
+        title = title_and_url.get('title', "")
+        url = title_and_url.get('url', "")
         titles_and_urls[title] = (url, category)
         print(f"{title}: {titles_and_urls[title]}")
-    print("")
+        print("")
 
 stories = {}
+
 for title, (url, category) in titles_and_urls.items():
     print(f"Title: {title}")
     print(f"Category: {category}")

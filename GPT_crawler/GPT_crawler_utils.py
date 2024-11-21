@@ -93,7 +93,7 @@ def GPT_boolean(url, query):
     try:
         # OpenAI completion API call
         completion = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
             {"role": "system", "content": "Some times AI returns incorrect urls, You are a helpful assistant that evaluates that checks the webpage snap shot and determine if there actually stories (with title and urls) in that page. Return 'True' if the content is relevant to the query and 'False' otherwise. return false if page not found or story not found."},
             {"role": "user", "content": get_text_snapshot(url)},
@@ -135,7 +135,7 @@ def GPT_boolean(url, query):
 @backoff.on_exception(backoff.expo, RateLimitError, max_time=60)
 def get_titles_and_urls(url):
     completion = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "system",
@@ -157,7 +157,7 @@ def get_titles_and_urls(url):
             }
         ],
         temperature=0.0,
-        response_format={
+        response_format = {
         "type": "json_schema",
         "json_schema": {
             "name": "titles_dict",
@@ -167,9 +167,8 @@ def get_titles_and_urls(url):
                     "titles_and_urls": {
                         "description": "A dictionary where keys are content titles and values are the corresponding URLs.",
                         "type": "object",
-                        "additionalProperties": {  # Enforce key-value pairs in titles_and_urls
-                            "type": "string",  # Each value (URL) must be a string
-                            "description": "The URL corresponding to the title."
+                        "additionalProperties": {
+                            "type": "string"
                         }
                     },
                     "next_page": {
@@ -189,7 +188,7 @@ def get_titles_and_urls(url):
 @backoff.on_exception(backoff.expo, RateLimitError, max_time=60)
 def get_content(url):
     completion = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {
                     "role": "system",
