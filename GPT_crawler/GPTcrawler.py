@@ -9,7 +9,7 @@ client = OpenAI()
 
 base_url = "https://storiestogrowby.org/"
 #base_url = "https://www.freechildrenstories.com/"
-#base_url = "https://www.freechildrenstories.com/"
+#base_url = "https://www.storyberries.com/"
 
 completion_category = GPT_crawler.find_available_content(base_url)
 categories = json.loads(completion_category.choices[0].message.content).get('categories', {})
