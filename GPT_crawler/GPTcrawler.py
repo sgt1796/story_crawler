@@ -49,22 +49,31 @@ for category, category_url in categories.items():
     print(category)
     print(category_url)
 
+## Get the titles and urls of the stories of each category
+print("Fetching titles and urls of the stories of each category...")
 titles_and_urls = {}  
 
 for category, category_url in categories.items():
-    snapshot = GPT_crawler.get_text_snapshot(category_url, exclude_selector=excluded_selectors, links_at_end=True)
-    snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
-    
-    completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
-    titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
     print(f"Category: {category}")
-    
-    for title_and_url in titles_and_urls_list:
-        title = title_and_url.get('title', "")
-        url = title_and_url.get('url', "")
-        titles_and_urls[title] = (url, category)
-        print(f"{title}: {titles_and_urls[title]}")
-        print("")
+    page = 0
+    next_page = ""
+    while page == 0 or next_page:
+        page += 1
+        print(f"Page: {page}")
+        snapshot = GPT_crawler.get_text_snapshot(category_url, exclude_selector=excluded_selectors, links_at_end=True)
+        snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
+        
+        completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
+        titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
+        next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")
+        
+        for title_and_url in titles_and_urls_list:
+            title = title_and_url.get('title', "")
+            url = title_and_url.get('url', "")
+            titles_and_urls[title] = (url, category)
+            print(f"{title}: {titles_and_urls[title]}")
+            print("")
+        print(f"Next page: {next_page}")
 
 stories = {}
 
@@ -74,8 +83,14 @@ for title, (url, category) in titles_and_urls.items():
     print(f"URL: {url}")
     print("")
     completion = GPT_crawler.get_content(url)
-    content = json.loads(completion.choices[0].message.content).get('content', {})
-    next_page = json.loads(completion.choices[0].message.content).get('next_page', "") # should be empty
+    try:
+        content = json.loads(completion.choices[0].message.content).get('content', {})
+        next_page = json.loads(completion.choices[0].message.content).get('next_page', "") # should be empty
+    except Exception as e:
+        print(f"Error while fetching story content: {e}")
+        print(completion)
+        content = {}
+        next_page = ""
 
     stories[title] = content
 
