@@ -50,17 +50,17 @@ for category, category_url in categories.items():
     print(category_url)
 
 ## Get the titles and urls of the stories of each category
-print("Fetching titles and urls of the stories of each category...")
+print("\nFetching titles and urls of the stories of each category...\n")
 titles_and_urls = {}  
 
 for category, category_url in categories.items():
-    print(f"Category: {category}")
+    print(f"Category: {category}\n")
     page = 0
-    next_page = ""
-    while page == 0 or next_page:
+    next_page = category_url
+    while next_page:
         page += 1
-        print(f"Page: {page}")
-        snapshot = GPT_crawler.get_text_snapshot(category_url, exclude_selector=excluded_selectors, links_at_end=True)
+        print(f"[Page: {page}]")
+        snapshot = GPT_crawler.get_text_snapshot(next_page, exclude_selector=excluded_selectors, links_at_end=True)
         snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
         
         completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
@@ -72,7 +72,6 @@ for category, category_url in categories.items():
             url = title_and_url.get('url', "")
             titles_and_urls[title] = (url, category)
             print(f"{title}: {titles_and_urls[title]}")
-            print("")
         print(f"Next page: {next_page}")
 
 stories = {}
