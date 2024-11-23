@@ -14,9 +14,7 @@ embedder = Embedder(use_api='jina')
 #base_url = "https://www.freechildrenstories.com/"
 base_url = "https://www.storyberries.com/"
 
-
 ## Chunks and merge the website snapshot
-base_url = "https://www.storyberries.com/"
 excluded_selectors = [
     # Advertisements
     ".ads", ".ad", ".advertisement", ".sponsored", ".promo", ".banner-ad", ".google-ad", ".ad-container",
@@ -62,7 +60,7 @@ for category, category_url in categories.items():
         print(f"[Page: {page}]")
         snapshot = GPT_crawler.get_text_snapshot(next_page, exclude_selector=excluded_selectors, links_at_end=True)
         snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
-        
+        snapshot_links = f"Current Page Number: {page}\n{snapshot_links}" # This might help the model to stop at the end of the page
         completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
         titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
         next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")

@@ -12,17 +12,20 @@ To accurately extract and organize bedtime story information from a given text v
 - **Target Information**: The primary objective is to extract the titles of the stories and their direct URLs. Additionally, capture the URL for the next page when applicable.
 
 ## Extraction Guidelines
-1. **Primary Extraction Focus**:
+1. **Title and URL**:
    - Isolate and retrieve only the titles of stories and their respective URLs, excluding any site navigation elements, advertisements, or non-relevant content.
    - Trim any superfluous whitespace surrounding the titles or URLs.
-   - Identify and include the URL for the next page of stories, if such exists. Usually those are corresponding to a number (2,3,4,etc) or some text such as "next page". **Do not** choose from other source instead of leaving it blank.
    - Make sure ALL of the URL and titles except those in ads or recommendation fields are obtained.
+2. **Guide line for locating next page**:
+   - Identify and include the URL for the next page of stories, if such exists. Usually those are corresponding to a number (2,3,4,etc) or some text such as "next page". **Do not** choose from other source instead of leaving it blank.
+   - Don't return any urls that is not present in the text snapshot giving you. 
+   - Look for hint for the last page, such as: no next page, and there's no url for any page number larger than the current page.
 
-2. **Handling Exceptions**:
+3. **Handling Exceptions**:
    - Should the text lack identifiable story titles, return a specific error message: `"Refused: No suitable bedtime stories found."`
    - Bypass any story URLs that redirect incorrectly (e.g., back to the homepage) instead of to the actual story content.
 
-3. **Output Presentation**:
+4. **Output Presentation**:
    - Format the extracted data as a JSON object.
    - Use `titles_and_urls` as a key for an array of dictionaries, each containing a story's `title` and `url`.
    - Maintain clarity and conciseness in listing titles and URLs.
