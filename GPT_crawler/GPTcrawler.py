@@ -1,17 +1,40 @@
 import GPT_crawler_utils as GPT_crawler
+from Embedder import Embedder
 from openai import OpenAI
 from dotenv import load_dotenv
 import json
 import pandas as pd
 
+GPT_MAX_TOKENS = 30000
 load_dotenv()
 client = OpenAI()
+embedder = Embedder(use_api='jina')
 
-base_url = "https://storiestogrowby.org/"
+#base_url = "https://storiestogrowby.org/"
 #base_url = "https://www.freechildrenstories.com/"
-#base_url = "https://www.storyberries.com/"
+base_url = "https://www.storyberries.com/"
 
-completion_category = GPT_crawler.find_available_content(base_url)
+
+## Chunks and merge the website snapshot
+base_url = "https://www.storyberries.com/"
+excluded_selectors = [
+    # Advertisements
+    ".ads", ".ad", ".advertisement", ".sponsored", ".promo", ".banner-ad", ".google-ad", ".ad-container",
+    # Sidebar and widgets
+    ".sidebar", ".widget", ".widget-container", ".sidebar-content", ".related-posts", ".recommendations",
+    ".tag-cloud", ".sidebar-widget", ".right-sidebar", ".left-sidebar",
+    # Popups and modals
+    ".modal", ".popup", ".overlay", ".pop-up", ".cookie-banner", ".consent-banner", ".alert",
+    # Social media and sharing
+    ".social", ".share", ".share-buttons", ".follow-us", ".social-links", ".social-widget", ".social-icons",
+    # Other common non-content elements
+    ".search", ".search-bar", ".search-box", ".contact-form", ".newsletter", ".subscribe", ".logo",
+    ".branding", ".terms", ".privacy-policy", ".faq", ".site-map"
+]
+snapshot = GPT_crawler.get_text_snapshot(base_url, exclude_selector=excluded_selectors, links_at_end=True) # put links at the end for better crawling
+snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
+
+completion_category = GPT_crawler.find_available_content(snapshot_links)
 categories = json.loads(completion_category.choices[0].message.content).get('categories', {})
 
 ### check correctness of the categories url
@@ -22,16 +45,17 @@ for category, category_url in categories.copy().items():
         print(f"The category '{category}' does not contain stories for kids.")
         del categories[category] 
 
-
 for category, category_url in categories.items():
     print(category)
     print(category_url)
 
-
 titles_and_urls = {}  
 
 for category, category_url in categories.items():
-    completion_titles = GPT_crawler.get_titles_and_urls(category_url)
+    snapshot = GPT_crawler.get_text_snapshot(category_url, exclude_selector=excluded_selectors, links_at_end=True)
+    snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
+    
+    completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
     titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
     print(f"Category: {category}")
     
