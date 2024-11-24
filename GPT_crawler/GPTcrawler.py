@@ -11,8 +11,8 @@ client = OpenAI()
 embedder = Embedder(use_api='jina')
 
 #base_url = "https://storiestogrowby.org/"
-#base_url = "https://www.freechildrenstories.com/"
-base_url = "https://www.storyberries.com/"
+base_url = "https://www.freechildrenstories.com/"
+#base_url = "https://www.storyberries.com/"
 
 ## Chunks and merge the website snapshot
 excluded_selectors = [
@@ -50,7 +50,8 @@ for category, category_url in categories.items():
 ## Get the titles and urls of the stories of each category
 print("\nFetching titles and urls of the stories of each category...\n")
 titles_and_urls = {}  
-
+excluded_selectors_title = excluded_selectors
+send_full_page = False # whether send full page to the model
 for category, category_url in categories.items():
     print(f"Category: {category}\n")
     page = 0
@@ -61,10 +62,21 @@ for category, category_url in categories.items():
         snapshot = GPT_crawler.get_text_snapshot(next_page, exclude_selector=excluded_selectors, links_at_end=True)
         snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
         snapshot_links = f"Current Page Number: {page}\n{snapshot_links}" # This might help the model to stop at the end of the page
-        completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
+        if not send_full_page:
+            completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
+        else:
+            completion_titles = GPT_crawler.get_titles_and_urls(next_page)
         titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
         next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")
         
+        ## if the crawled content is empty, try to crawl the full page
+        if not titles_and_urls_list and not send_full_page:
+            print("Empty content. Trying to send the full page to the model.")
+            send_full_page = True
+            completion_titles = GPT_crawler.get_titles_and_urls(next_page)
+            titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
+            next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")
+
         for title_and_url in titles_and_urls_list:
             title = title_and_url.get('title', "")
             url = title_and_url.get('url', "")
