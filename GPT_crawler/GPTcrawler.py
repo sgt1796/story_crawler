@@ -42,6 +42,7 @@ for category, category_url in categories.copy().items():
     else:
         print(f"The category '{category}' does not contain stories for kids.")
         del categories[category] 
+print()
 
 for category, category_url in categories.items():
     print(category)
@@ -53,35 +54,54 @@ titles_and_urls = {}
 excluded_selectors_title = excluded_selectors
 send_full_page = False # whether send full page to the model
 for category, category_url in categories.items():
-    print(f"Category: {category}\n")
+    print(f"Category: {category}\nURL: {category_url}\n")
     page = 0
     next_page = category_url
+    cached_snapshot = None  # Cache the valid snapshot
+
     while next_page:
         page += 1
         print(f"[Page: {page}]")
-        snapshot = GPT_crawler.get_text_snapshot(next_page, exclude_selector=excluded_selectors, links_at_end=True)
+
+        # Fetch or reuse snapshot
+        if cached_snapshot and cached_snapshot.get("url") == next_page:
+            snapshot = cached_snapshot["snapshot"]
+        else:
+            snapshot = f"{GPT_crawler.get_text_snapshot(next_page, exclude_selector=excluded_selectors, links_at_end=True)}\nCurrent Page Number: {page}" # This might help the model to stop at the end of the page
+            cached_snapshot = None  # Reset cache
+
         snapshot_links = snapshot[snapshot.find("Links/Buttons:"):]
-        snapshot_links = f"Current Page Number: {page}\n{snapshot_links}" # This might help the model to stop at the end of the page
+
         if not send_full_page:
             completion_titles = GPT_crawler.get_titles_and_urls(snapshot_links)
         else:
-            completion_titles = GPT_crawler.get_titles_and_urls(next_page)
+            completion_titles = GPT_crawler.get_titles_and_urls(snapshot)
+
         titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
-        next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")
         
         ## if the crawled content is empty, try to crawl the full page
         if not titles_and_urls_list and not send_full_page:
-            print("Empty content. Trying to send the full page to the model.")
+            print("Empty content. Setting send_full_page to True and retrying...")
             send_full_page = True
-            completion_titles = GPT_crawler.get_titles_and_urls(next_page)
-            titles_and_urls_list = json.loads(completion_titles.choices[0].message.content).get('titles_and_urls', [])
-            next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")
+            page -= 1
+            continue # restart the loop with full page mode
 
         for title_and_url in titles_and_urls_list:
             title = title_and_url.get('title', "")
             url = title_and_url.get('url', "")
             titles_and_urls[title] = (url, category)
             print(f"{title}: {titles_and_urls[title]}")
+
+        next_page = json.loads(completion_titles.choices[0].message.content).get('next_page', "")
+        ## validate the next page exists
+        query = f"the current page is {page}, does this page have a link to next page or page {page+1}?"
+        snapshot = f"{GPT_crawler.get_text_snapshot(next_page, exclude_selector=excluded_selectors, links_at_end=True)}\nCurrent Page Number: {page}" # This might help the model to stop at the end of the page
+        if GPT_crawler.GPT_boolean(snapshot, query):
+            cached_snapshot = {"url": next_page, "snapshot": snapshot}
+        else:
+            print(f"Next page does not exist.")
+            next_page = ""
+
         print(f"Next page: {next_page}")
 
 stories = {}

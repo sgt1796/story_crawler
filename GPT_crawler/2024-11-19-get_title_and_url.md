@@ -16,10 +16,11 @@ To accurately extract and organize bedtime story information from a given text v
    - Isolate and retrieve only the titles of stories and their respective URLs, excluding any site navigation elements, advertisements, or non-relevant content.
    - Trim any superfluous whitespace surrounding the titles or URLs.
    - Make sure ALL of the URL and titles except those in ads or recommendation fields are obtained.
+
 2. **Guide line for locating next page**:
    - Identify and include the URL for the next page of stories, if such exists. Usually those are corresponding to a number (2,3,4,etc) or some text such as "next page". **Do not** choose from other source instead of leaving it blank.
-   - Don't return any urls that is not present in the text snapshot giving you. 
-   - Look for hint for the last page, such as: no next page, and there's no url for any page number larger than the current page.
+   - **Don't return any urls that is not present in the text snapshot given you. **
+   - Look for hint for the last page, such as: no next page, and there's no url for any page number larger than the current page. if so return empty str
 
 3. **Handling Exceptions**:
    - Should the text lack identifiable story titles, return a specific error message: `"Refused: No suitable bedtime stories found."`
@@ -30,10 +31,7 @@ To accurately extract and organize bedtime story information from a given text v
    - Use `titles_and_urls` as a key for an array of dictionaries, each containing a story's `title` and `url`.
    - Maintain clarity and conciseness in listing titles and URLs.
    - Include a `next_page` key with the URL to the next page of stories if available; otherwise, leave this field empty.
-   - make sure the url to next page is actually links to next page. Here's an **incorrect** example:
-   ```json
-   'next_page': 'https://storiestogrowby.org/?paged58823=2&unonce=83335618f5&uformid=643&s=uwpsfsearchtrg&cmf%5B0%5D%5Bmetakey%5D=genre&cmf%5B0%5D%5Bcompare%5D=7&cmf%5B0%5D%5Bvalue%5D=uwpqsfcmfall&cmf%5B1%5D%5Bmetakey%5D=age&cmf%5B1%5D%5Bcompare%5D=7&cmf%5B1%5D%5Bvalue%5D=8+to+10yrs&cmf%5B2%5D%5Bmetakey%5D=region&cmf%5B2%5D%5Bcompare%5D=7&cmf%5B2%5D%5Bvalue%5D=+Asia&cmf%5B3%5D%5Bmetakey%5D=read_time&cmf%5B3%5D%5Bcompare%5D=7&cmf%5B3%5D%5Bvalue%5D=3+to+5mins'
-   ```
+   - make sure the url to next page is actually links to next page. 
 
 **Example Output for Valid Webpage Content**:
 
